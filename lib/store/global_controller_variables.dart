@@ -9,6 +9,8 @@ final microphoneAndSpeakerController =
 final grpcController = Get.put(GrpcControllr());
 final variableController = Get.put(VariableControllr());
 
+final jwtGrpcController = Get.put(JWTGrpcControllr());
+
 Future<void> myGlobalInitFunction() async {
   variableController.ourUUID = await getUniqueDeviceId();
   microphoneAndSpeakerController.recorder.initialize();

@@ -8,6 +8,7 @@ import 'package:flutter_client/pages/welcome/invitation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:flutter_client/store/global_controller_variables.dart';
 
 class EmailPage extends StatefulWidget {
   const EmailPage({Key? key}) : super(key: key);
@@ -153,7 +154,8 @@ class _EmailPageState extends State<EmailPage> {
                   textColor: Colors.black,
                   fontSize: 16.0);
             } else {
-              Get.offNamed(RoutesMap.registerVerifying);
+              // Get.offNamed(RoutesMap.registerVerifying);
+              await jwtGrpcController.test();
             }
           },
           child: Row(

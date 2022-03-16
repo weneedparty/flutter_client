@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_client/generated_grpc/helloworld.pbgrpc.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
 import 'package:flutter_client/utils.dart';
@@ -131,5 +132,45 @@ class GrpcControllr extends GetxController {
     final response = await stub
         .stopSpeaking(StopSpeakingRequest()..uuid = variableController.ourUUID);
     await temporaryChannel.shutdown();
+  }
+}
+
+class JWTGrpcControllr extends GetxController {
+  ClientChannel channel = ClientChannel(
+    hostIPAddress,
+    port: portNumber,
+    options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
+  );
+
+  String jwt = "a fake jwt";
+
+  CallOptions getJWTCallOptionsForGRPC() {
+    return CallOptions(
+      metadata: <String, String>{
+        'jwt': jwt,
+      },
+    );
+  }
+
+  void recreateChannel() {
+    channel = ClientChannel(
+      hostIPAddress,
+      port: portNumber,
+      options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
+    );
+  }
+
+  Future<void> test() async {
+    recreateChannel();
+
+    try {
+      final stub = GreeterClient(channel);
+      final response = await stub.sayHello(HelloRequest()..name = 'you',
+          options: getJWTCallOptionsForGRPC());
+      print('Greeter client received: ${response.message}');
+      await channel.shutdown();
+    } catch (e) {
+      print(e);
+    }
   }
 }
