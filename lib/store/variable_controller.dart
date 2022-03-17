@@ -7,4 +7,7 @@ class VariableControllr extends GetxController {
   final cron = Cron();
 
   RxList<String> currentUsersUUID = RxList([]);
+
+  String userEmail = "";
+  String jwt = "";
 }

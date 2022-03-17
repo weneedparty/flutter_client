@@ -5,3 +5,11 @@ class RoutesMap {
   static const chatRoom = "/chat_room";
   static const roomList = "/room_list";
 }
+
+class GrpcConfig {
+  static const hostIPAddress = "10.0.2.2";
+  // static const hostIPAddress = "192.168.50.189";
+
+  static const helloworldPortNumber = 40051;
+  static const accountservicePortNumber = 40052;
+}

@@ -2,49 +2,48 @@ import 'dart:core';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_client/generated_grpc/account_service.pbgrpc.dart'
+    as account_service;
 import 'package:flutter_client/generated_grpc/helloworld.pbgrpc.dart';
+import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
 import 'package:flutter_client/utils.dart';
 import 'package:get/get.dart';
 import 'package:grpc/grpc.dart';
 
-const hostIPAddress = "10.0.2.2";
-// const hostIPAddress = "192.168.50.189";
-const portNumber = 40051;
-
 class GrpcControllr extends GetxController {
   ClientChannel sendingChannel = ClientChannel(
-    hostIPAddress,
-    port: portNumber,
+    GrpcConfig.hostIPAddress,
+    port: GrpcConfig.helloworldPortNumber,
     options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
   );
 
   ClientChannel receivingChannel = ClientChannel(
-    hostIPAddress,
-    port: portNumber,
+    GrpcConfig.hostIPAddress,
+    port: GrpcConfig.helloworldPortNumber,
     options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
   );
 
   void recreateSendingChannel() {
     sendingChannel = ClientChannel(
-      hostIPAddress,
-      port: portNumber,
+      GrpcConfig.hostIPAddress,
+      port: GrpcConfig.helloworldPortNumber,
       options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
     );
   }
 
   void recreateReceivingChannel() {
     receivingChannel = ClientChannel(
-      hostIPAddress,
-      port: portNumber,
+      GrpcConfig.hostIPAddress,
+      port: GrpcConfig.helloworldPortNumber,
       options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
     );
   }
 
   ClientChannel getATempraryChannel() {
     return ClientChannel(
-      hostIPAddress,
-      port: portNumber,
+      GrpcConfig.hostIPAddress,
+      port: GrpcConfig.helloworldPortNumber,
       options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
     );
   }
@@ -137,25 +136,23 @@ class GrpcControllr extends GetxController {
 
 class JWTGrpcControllr extends GetxController {
   ClientChannel channel = ClientChannel(
-    hostIPAddress,
-    port: portNumber,
+    GrpcConfig.hostIPAddress,
+    port: GrpcConfig.accountservicePortNumber,
     options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
   );
-
-  String jwt = "a fake jwt";
 
   CallOptions getJWTCallOptionsForGRPC() {
     return CallOptions(
       metadata: <String, String>{
-        'jwt': jwt,
+        'jwt': "a fake jwt",
       },
     );
   }
 
   void recreateChannel() {
     channel = ClientChannel(
-      hostIPAddress,
-      port: portNumber,
+      GrpcConfig.hostIPAddress,
+      port: GrpcConfig.accountservicePortNumber,
       options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
     );
   }
@@ -164,13 +161,90 @@ class JWTGrpcControllr extends GetxController {
     recreateChannel();
 
     try {
-      final stub = GreeterClient(channel);
-      final response = await stub.sayHello(HelloRequest()..name = 'you',
-          options: getJWTCallOptionsForGRPC());
+      final stub = account_service.AccountServiceClient(channel);
+      final response = await stub.sayHello(
+        account_service.HelloRequest()..name = 'you',
+      );
+      // options: getJWTCallOptionsForGRPC());
       print('Greeter client received: ${response.message}');
       await channel.shutdown();
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<bool> preRegister({required String email}) async {
+    recreateChannel();
+
+    try {
+      final stub = account_service.AccountServiceClient(channel);
+      final response = await stub.userRegisterRequest(
+          account_service.RegisterRequest()..email = email);
+
+      String error = response.error;
+      if (error.length != 0) {
+        print('pre_register failed: $error');
+        return false;
+      }
+
+      await channel.shutdown();
+
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<String?> registerConfirm(
+      {required String email, required String code}) async {
+    recreateChannel();
+
+    try {
+      final stub = account_service.AccountServiceClient(channel);
+
+      final response = await stub.userRegisterConfirm(
+        account_service.RegisterConfirmRequest()
+          ..email = email
+          ..randomString = code,
+      );
+
+      String error = response.error;
+      if (error.length != 0) {
+        print('register_confirm failed: $error');
+        return null;
+      }
+
+      await channel.shutdown();
+
+      return response.result.jwt;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<String?> authJwt({required String jwt}) async {
+    recreateChannel();
+
+    try {
+      final stub = account_service.AccountServiceClient(channel);
+
+      final response =
+          await stub.jWTIsOK(account_service.JWTIsOKRequest()..jwt = jwt);
+
+      bool ok = response.ok;
+      if (ok == false) {
+        print('jwt is not ok');
+        return null;
+      }
+
+      await channel.shutdown();
+
+      return response.email;
+    } catch (e) {
+      print(e);
+      return null;
     }
   }
 }

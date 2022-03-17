@@ -18,7 +18,7 @@ class EmailPage extends StatefulWidget {
 }
 
 class _EmailPageState extends State<EmailPage> {
-  final _phoneNumberController = TextEditingController();
+  final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool emailIsValid = false;
@@ -97,7 +97,7 @@ class _EmailPageState extends State<EmailPage> {
                   }
                   return null;
                 },
-                controller: _phoneNumberController,
+                controller: _emailController,
                 autocorrect: false,
                 autofocus: false,
                 decoration: const InputDecoration(
@@ -154,8 +154,21 @@ class _EmailPageState extends State<EmailPage> {
                   textColor: Colors.black,
                   fontSize: 16.0);
             } else {
-              // Get.offNamed(RoutesMap.registerVerifying);
-              await jwtGrpcController.test();
+              bool result = await jwtGrpcController.preRegister(
+                  email: _emailController.text);
+              if (result) {
+                variableController.userEmail = _emailController.text;
+                Get.offNamed(RoutesMap.registerVerifying);
+              } else {
+                Fluttertoast.showToast(
+                    msg: "Something went wrong!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.white,
+                    textColor: Colors.black,
+                    fontSize: 16.0);
+              }
             }
           },
           child: Row(

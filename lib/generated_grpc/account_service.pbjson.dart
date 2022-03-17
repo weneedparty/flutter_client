@@ -103,8 +103,9 @@ const JWTIsOKReply$json = const {
   '1': 'JWTIsOKReply',
   '2': const [
     const {'1': 'ok', '3': 1, '4': 1, '5': 8, '10': 'ok'},
+    const {'1': 'email', '3': 2, '4': 1, '5': 9, '10': 'email'},
   ],
 };
 
 /// Descriptor for `JWTIsOKReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List jWTIsOKReplyDescriptor = $convert.base64Decode('CgxKV1RJc09LUmVwbHkSDgoCb2sYASABKAhSAm9r');
+final $typed_data.Uint8List jWTIsOKReplyDescriptor = $convert.base64Decode('CgxKV1RJc09LUmVwbHkSDgoCb2sYASABKAhSAm9rEhQKBWVtYWlsGAIgASgJUgVlbWFpbA==');

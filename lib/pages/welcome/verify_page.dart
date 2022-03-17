@@ -1,4 +1,5 @@
 import 'package:flutter_client/store/constants.dart';
+import 'package:flutter_client/store/global_controller_variables.dart';
 import 'package:flutter_client/utils.dart';
 import 'package:flutter_client/widgets/round_button.dart';
 import 'package:flutter_client/util/style.dart';
@@ -148,7 +149,24 @@ class _VerifyPageState extends State<VerifyPage> {
                   textColor: Colors.black,
                   fontSize: 16.0);
             } else {
-              Get.offNamed(RoutesMap.roomList);
+              String? jwt = await jwtGrpcController.registerConfirm(
+                  email: variableController.userEmail,
+                  code: _codeController.text);
+              if (jwt != null) {
+                variableController.jwt = jwt;
+                print(jwt);
+                Get.offNamed(RoutesMap.roomList);
+              } else {
+                Fluttertoast.showToast(
+                    msg: "Invalid code!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.white,
+                    textColor: Colors.black,
+                    fontSize: 16.0);
+                Get.offNamed(RoutesMap.register);
+              }
             }
           },
           child: Row(
