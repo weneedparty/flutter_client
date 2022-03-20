@@ -1,5 +1,5 @@
 import 'package:flutter_client/models/user.dart';
-import 'package:flutter_client/util/style.dart';
+import 'package:flutter_client/utils/style.dart';
 import 'package:flutter_client/widgets/round_image.dart';
 import 'package:flutter/material.dart';
 

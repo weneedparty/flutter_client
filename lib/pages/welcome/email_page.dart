@@ -1,10 +1,9 @@
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/variable_controller.dart';
-import 'package:flutter_client/util/history.dart';
-import 'package:flutter_client/utils.dart';
+import 'package:flutter_client/utils/utils.dart';
 import 'package:flutter_client/widgets/round_button.dart';
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:flutter_client/util/style.dart';
+import 'package:flutter_client/utils/style.dart';
 import 'package:flutter_client/pages/welcome/invitation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -112,8 +111,7 @@ class _EmailPageState extends State<EmailPage> {
                   errorBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                    signed: true, decimal: true),
+                keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(
                   fontSize: 20,
                   color: Colors.black,

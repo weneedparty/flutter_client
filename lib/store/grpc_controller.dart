@@ -10,7 +10,7 @@ import 'package:flutter_client/generated_grpc/helloworld.pbgrpc.dart';
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
 import 'package:flutter_client/store/variable_controller.dart';
-import 'package:flutter_client/utils.dart';
+import 'package:flutter_client/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:grpc/grpc.dart';
 
@@ -312,9 +312,69 @@ class RoomControlGrpcControllr extends GetxController {
           room_control_service.HelloRequest()..name = 'you',
           options: getJWTCallOptionsForGRPC());
       print('Greeter client received: ${response.message}');
-      await channel.shutdown();
     } catch (e) {
       print(e);
+    } finally {
+      await channel.shutdown();
+    }
+  }
+
+  Future<List<room_control_service.RoomInfo>> getRoomList() async {
+    recreateChannel();
+
+    try {
+      final stub = room_control_service.RoomControlServiceClient(channel);
+      final response = await stub.listRooms(
+          room_control_service.ListRoomsRequest(),
+          options: getJWTCallOptionsForGRPC());
+      print('room list received: ${response.rooms}');
+      return response.rooms;
+    } catch (e) {
+      print(e);
+      return [];
+    } finally {
+      await channel.shutdown();
+    }
+  }
+
+  Future<bool> createRoom({required String roomName}) async {
+    recreateChannel();
+
+    try {
+      final stub = room_control_service.RoomControlServiceClient(channel);
+      final response = await stub.createRoom(
+          room_control_service.CreateRoomRequest(roomName: roomName),
+          options: getJWTCallOptionsForGRPC());
+      if (response.success) {
+        print('room created: $roomName');
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
+    } finally {
+      await channel.shutdown();
+    }
+  }
+
+  Future<String?> getAccessToARoom({required String roomName}) async {
+    recreateChannel();
+
+    try {
+      final stub = room_control_service.RoomControlServiceClient(channel);
+      final response = await stub.allowJoin(
+          room_control_service.AllowJoinRequest(roomName: roomName),
+          options: getJWTCallOptionsForGRPC());
+      if (response.accessToken != "") {
+        return response.accessToken;
+      }
+      return null;
+    } catch (e) {
+      print(e);
+      return null;
+    } finally {
+      await channel.shutdown();
     }
   }
 }

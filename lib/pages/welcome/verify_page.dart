@@ -1,9 +1,9 @@
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
 import 'package:flutter_client/store/variable_controller.dart';
-import 'package:flutter_client/utils.dart';
+import 'package:flutter_client/utils/utils.dart';
 import 'package:flutter_client/widgets/round_button.dart';
-import 'package:flutter_client/util/style.dart';
+import 'package:flutter_client/utils/style.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -107,8 +107,7 @@ class _VerifyPageState extends State<VerifyPage> {
                   errorBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                    signed: true, decimal: true),
+                keyboardType: TextInputType.text,
                 style: const TextStyle(
                   fontSize: 20,
                   color: Colors.black,

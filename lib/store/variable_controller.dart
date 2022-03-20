@@ -2,7 +2,7 @@ import 'dart:core';
 import 'package:cron/cron.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_client/utils.dart';
+import 'package:flutter_client/utils/utils.dart';
 
 class LocalStorageKeys {
   static const userEmail = "userEmail";
@@ -15,6 +15,7 @@ class VariableControllr extends GetxController {
 
   RxList<String> currentUsersUUID = RxList([]);
   String? jwt;
+  String? accessToken;
 
   SharedPreferences? preferences;
 

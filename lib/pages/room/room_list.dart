@@ -1,11 +1,13 @@
+import 'package:flutter_client/generated_grpc/room_control_service.pb.dart';
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
 import 'package:flutter_client/store/variable_controller.dart';
 import 'package:flutter_client/widgets/round_button.dart';
-import 'package:flutter_client/util/style.dart';
+import 'package:flutter_client/utils/style.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class RoomListPage extends StatefulWidget {
   const RoomListPage({Key? key}) : super(key: key);
@@ -15,29 +17,15 @@ class RoomListPage extends StatefulWidget {
 }
 
 class _RoomListPageState extends State<RoomListPage> {
+  List<RoomInfo> rooms = [];
+
   @override
   void initState() {
     super.initState();
 
-    // Future.delayed(const Duration(seconds: 3), () {
-    //   () async {
-    //     String? email = await jwtGrpcController.authJwt(
-    //         jwt: variableController.preferences
-    //                 ?.getString(LocalStorageKeys.jwt) ??
-    //             "");
-
-    //     if (email != null) {
-    //       Fluttertoast.showToast(
-    //           msg: "Hello $email, \nwelcome on board!",
-    //           toastLength: Toast.LENGTH_SHORT,
-    //           gravity: ToastGravity.CENTER,
-    //           timeInSecForIosWeb: 1,
-    //           backgroundColor: Colors.white,
-    //           textColor: Colors.black,
-    //           fontSize: 16.0);
-    //     }
-    //   }();
-    // });
+    () async {
+      rooms = await roomControlGrpcControllr.getRoomList();
+    }();
   }
 
   @override
@@ -56,10 +44,40 @@ class _RoomListPageState extends State<RoomListPage> {
           children: [
             buildTitle(),
             const SizedBox(
-              height: 80,
+              height: 70,
             ),
             Expanded(
               child: buildContents(),
+            ),
+            const SizedBox(
+              height: 80,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RoundButton(
+                  color: Style.AccentBlue,
+                  onPressed: () {
+                    showCreateRoomDialog(context: context);
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Text(
+                        'Create a room',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                      Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -73,7 +91,7 @@ class _RoomListPageState extends State<RoomListPage> {
         await roomControlGrpcControllr.test();
       },
       child: const Text(
-        '🎉 Welcome!',
+        '🎉 Rooms!',
         style: TextStyle(
           fontSize: 25,
         ),
@@ -82,22 +100,111 @@ class _RoomListPageState extends State<RoomListPage> {
   }
 
   Widget buildContents() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
-            'The room is in construction. Please check back later.',
-            style: TextStyle(
-              height: 1.8,
-              fontSize: 15,
+    return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.fromSwatch(
+            accentColor: const Color.fromARGB(
+                255, 244, 237, 226), // but now it should be declared like this
+          ),
+        ),
+        child: rooms.isEmpty
+            ? const Center(
+                child: Text(
+                  'Nice, you are the first one here!',
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+              )
+            : ListView.separated(
+                physics: const ClampingScrollPhysics(),
+                itemCount: rooms.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(rooms[index].roomName),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider();
+                },
+              ));
+  }
+
+  void showCreateRoomDialog({required BuildContext context}) {
+    TextEditingController roomNameInputController = TextEditingController();
+
+    Alert(
+        context: context,
+        title: "Create a room",
+        content: Column(
+          children: <Widget>[
+            TextField(
+              controller: roomNameInputController,
+              // textAlign: TextAlign.center,
+              keyboardType: TextInputType.text,
+              decoration: const InputDecoration(
+                icon: Icon(Icons.house),
+                labelText: '',
+              ),
             ),
-          ),
-          SizedBox(
-            height: 40,
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+        buttons: [
+          DialogButton(
+            onPressed: () async {
+              String roomName = roomNameInputController.text;
+
+              if (roomName.isEmpty) {
+                Fluttertoast.showToast(
+                  msg: 'Please enter a valid room name',
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                return;
+              }
+
+              bool success =
+                  await roomControlGrpcControllr.createRoom(roomName: roomName);
+              if (success) {
+                String? accessToken = await roomControlGrpcControllr
+                    .getAccessToARoom(roomName: roomName);
+                if (accessToken != null) {
+                  variableController.accessToken = accessToken;
+
+                  Navigator.pop(context);
+                  Get.toNamed(RoutesMap.singleRoomPage);
+                  Fluttertoast.showToast(
+                      msg: "You just created a room: $roomName",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.CENTER,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.red,
+                      textColor: Colors.white,
+                      fontSize: 16.0);
+                  return;
+                }
+              } else {
+                Fluttertoast.showToast(
+                    msg: "Fail to create a room: $roomName",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              }
+
+              Navigator.pop(context);
+            },
+            child: const Text(
+              "Confirm",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]).show();
   }
 }
