@@ -12,7 +12,10 @@ class MicrophoneAndSpeakerController extends GetxController {
 
   Stream? recorderStream;
 
-  Future<void> initilizeFunction() async {}
+  Future<void> initilizeFunction() async {
+    microphoneAndSpeakerController.recorder.initialize();
+    microphoneAndSpeakerController.player.initialize();
+  }
 
   Future<bool> startRecording() async {
     recorder.status.listen((status) {

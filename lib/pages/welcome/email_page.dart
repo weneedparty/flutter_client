@@ -1,4 +1,5 @@
 import 'package:flutter_client/store/constants.dart';
+import 'package:flutter_client/store/variable_controller.dart';
 import 'package:flutter_client/util/history.dart';
 import 'package:flutter_client/utils.dart';
 import 'package:flutter_client/widgets/round_button.dart';
@@ -157,7 +158,8 @@ class _EmailPageState extends State<EmailPage> {
               bool result = await jwtGrpcController.preRegister(
                   email: _emailController.text);
               if (result) {
-                variableController.userEmail = _emailController.text;
+                variableController.preferences?.setString(
+                    LocalStorageKeys.userEmail, _emailController.text);
                 Get.offNamed(RoutesMap.registerVerifying);
               } else {
                 Fluttertoast.showToast(

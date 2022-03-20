@@ -1,5 +1,6 @@
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
+import 'package:flutter_client/store/variable_controller.dart';
 import 'package:flutter_client/widgets/round_button.dart';
 import 'package:flutter_client/util/style.dart';
 import 'package:flutter/material.dart';
@@ -18,23 +19,25 @@ class _RoomListPageState extends State<RoomListPage> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 3), () {
-      () async {
-        String? email =
-            await jwtGrpcController.authJwt(jwt: variableController.jwt);
+    // Future.delayed(const Duration(seconds: 3), () {
+    //   () async {
+    //     String? email = await jwtGrpcController.authJwt(
+    //         jwt: variableController.preferences
+    //                 ?.getString(LocalStorageKeys.jwt) ??
+    //             "");
 
-        if (email != null) {
-          Fluttertoast.showToast(
-              msg: "Hello $email, \nwelcome on board!",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.CENTER,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.white,
-              textColor: Colors.black,
-              fontSize: 16.0);
-        }
-      }();
-    });
+    //     if (email != null) {
+    //       Fluttertoast.showToast(
+    //           msg: "Hello $email, \nwelcome on board!",
+    //           toastLength: Toast.LENGTH_SHORT,
+    //           gravity: ToastGravity.CENTER,
+    //           timeInSecForIosWeb: 1,
+    //           backgroundColor: Colors.white,
+    //           textColor: Colors.black,
+    //           fontSize: 16.0);
+    //     }
+    //   }();
+    // });
   }
 
   @override
@@ -65,10 +68,15 @@ class _RoomListPageState extends State<RoomListPage> {
   }
 
   Widget buildTitle() {
-    return const Text(
-      '🎉 Welcome!',
-      style: TextStyle(
-        fontSize: 25,
+    return InkWell(
+      onTap: () async {
+        await roomControlGrpcControllr.test();
+      },
+      child: const Text(
+        '🎉 Welcome!',
+        style: TextStyle(
+          fontSize: 25,
+        ),
       ),
     );
   }

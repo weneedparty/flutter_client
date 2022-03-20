@@ -11,5 +11,6 @@ class GrpcConfig {
   // static const hostIPAddress = "192.168.50.189";
 
   static const helloworldPortNumber = 40051;
-  static const accountservicePortNumber = 40052;
+  static const accountservicePortNumber = 40054;
+  static const roomcontrolservicePortNumber = 40055;
 }

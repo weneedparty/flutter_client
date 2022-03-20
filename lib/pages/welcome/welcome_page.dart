@@ -1,11 +1,33 @@
 import 'package:flutter_client/store/constants.dart';
+import 'package:flutter_client/store/global_controller_variables.dart';
+import 'package:flutter_client/store/variable_controller.dart';
 import 'package:flutter_client/widgets/round_button.dart';
 import 'package:flutter_client/util/style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({Key? key}) : super(key: key);
+
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
+  @override
+  void initState() {
+    super.initState();
+
+    () async {
+      // await variableController.saveJwt(
+      //     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InlpbmdzaGFveG9AZ21haWwuY29tIiwicmFuZG9tX3N0cmluZyI6IjBGTzJFRSJ9.niSe3jhQdefzUJEgQgf7rqvrP2CkkCOls3YW5DkYE2c");
+      // Get.offNamed(RoutesMap.roomList);
+      bool valid = await jwtGrpcController.checkIfCurrentJwtIsValid();
+      if (valid) {
+        Get.offNamed(RoutesMap.roomList);
+      }
+    }();
+  }
 
   @override
   Widget build(BuildContext context) {

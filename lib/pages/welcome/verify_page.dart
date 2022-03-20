@@ -1,5 +1,6 @@
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
+import 'package:flutter_client/store/variable_controller.dart';
 import 'package:flutter_client/utils.dart';
 import 'package:flutter_client/widgets/round_button.dart';
 import 'package:flutter_client/util/style.dart';
@@ -150,11 +151,13 @@ class _VerifyPageState extends State<VerifyPage> {
                   fontSize: 16.0);
             } else {
               String? jwt = await jwtGrpcController.registerConfirm(
-                  email: variableController.userEmail,
+                  email: variableController.preferences
+                          ?.getString(LocalStorageKeys.userEmail) ??
+                      "",
                   code: _codeController.text);
               if (jwt != null) {
-                variableController.jwt = jwt;
-                print(jwt);
+                await variableController.saveJwt(jwt);
+                print("jwt: " + jwt);
                 Get.offNamed(RoutesMap.roomList);
               } else {
                 Fluttertoast.showToast(

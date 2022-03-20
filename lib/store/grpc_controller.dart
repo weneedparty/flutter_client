@@ -4,9 +4,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_client/generated_grpc/account_service.pbgrpc.dart'
     as account_service;
+import 'package:flutter_client/generated_grpc/room_control_service.pbgrpc.dart'
+    as room_control_service;
 import 'package:flutter_client/generated_grpc/helloworld.pbgrpc.dart';
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
+import 'package:flutter_client/store/variable_controller.dart';
 import 'package:flutter_client/utils.dart';
 import 'package:get/get.dart';
 import 'package:grpc/grpc.dart';
@@ -245,6 +248,73 @@ class JWTGrpcControllr extends GetxController {
     } catch (e) {
       print(e);
       return null;
+    }
+  }
+
+  Future<bool> checkIfCurrentJwtIsValid() async {
+    recreateChannel();
+
+    try {
+      final stub = account_service.AccountServiceClient(channel);
+
+      String? jwt = variableController.jwt;
+      if (jwt == null || jwt == "") {
+        return false;
+      }
+
+      final response =
+          await stub.jWTIsOK(account_service.JWTIsOKRequest()..jwt = jwt);
+
+      bool ok = response.ok;
+      if (ok == false) {
+        print('jwt is not ok');
+        return false;
+      }
+
+      await channel.shutdown();
+
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+}
+
+class RoomControlGrpcControllr extends GetxController {
+  ClientChannel channel = ClientChannel(
+    GrpcConfig.hostIPAddress,
+    port: GrpcConfig.roomcontrolservicePortNumber,
+    options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
+  );
+
+  CallOptions getJWTCallOptionsForGRPC() {
+    return CallOptions(
+      metadata: <String, String>{'jwt': variableController.jwt ?? ""},
+      // metadata: <String, String>{'jwt': ""},
+    );
+  }
+
+  void recreateChannel() {
+    channel = ClientChannel(
+      GrpcConfig.hostIPAddress,
+      port: GrpcConfig.roomcontrolservicePortNumber,
+      options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
+    );
+  }
+
+  Future<void> test() async {
+    recreateChannel();
+
+    try {
+      final stub = room_control_service.RoomControlServiceClient(channel);
+      final response = await stub.sayHello(
+          room_control_service.HelloRequest()..name = 'you',
+          options: getJWTCallOptionsForGRPC());
+      print('Greeter client received: ${response.message}');
+      await channel.shutdown();
+    } catch (e) {
+      print(e);
     }
   }
 }
