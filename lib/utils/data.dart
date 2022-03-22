@@ -48,7 +48,7 @@ List userData = List.generate(
 dynamic profileData = {
   'name': 'Golden Retriever',
   'username': '@dog',
-  'profileImage': 'assets/images/profile.jpg',
+  'profileImage': 'assets/images/cat2.jpg',
   'followers': '1k',
   'following': '1',
   'lastAccessTime': '0m',

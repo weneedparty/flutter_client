@@ -19,12 +19,17 @@ class RoomListPage extends StatefulWidget {
 class _RoomListPageState extends State<RoomListPage> {
   List<RoomInfo> rooms = [];
 
+  Future<void> updateRooms() async {
+    rooms = await roomControlGrpcControllr.getRoomList();
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
 
     () async {
-      rooms = await roomControlGrpcControllr.getRoomList();
+      await updateRooms();
     }();
   }
 
@@ -88,7 +93,7 @@ class _RoomListPageState extends State<RoomListPage> {
   Widget buildTitle() {
     return InkWell(
       onTap: () async {
-        await roomControlGrpcControllr.test();
+        await updateRooms();
       },
       child: const Text(
         '🎉 Rooms!',
@@ -100,6 +105,10 @@ class _RoomListPageState extends State<RoomListPage> {
   }
 
   Widget buildContents() {
+    final border = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10.0),
+    );
+
     return Theme(
         data: Theme.of(context).copyWith(
           colorScheme: ColorScheme.fromSwatch(
@@ -116,17 +125,57 @@ class _RoomListPageState extends State<RoomListPage> {
                   ),
                 ),
               )
-            : ListView.separated(
-                physics: const ClampingScrollPhysics(),
-                itemCount: rooms.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(rooms[index].roomName),
-                  );
-                },
-                separatorBuilder: (context, index) {
-                  return const Divider();
-                },
+            : Card(
+                color: const Color.fromARGB(255, 200, 214, 228),
+                borderOnForeground: true,
+                shape: border,
+                child: Card(
+                  borderOnForeground: true,
+                  shape: border,
+                  child: ListView.separated(
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: rooms.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        // shape: RoundedRectangleBorder(
+                        //     side: const BorderSide(
+                        //         color: Colors.transparent, width: 1),
+                        //     borderRadius: BorderRadius.circular(0)),
+                        title: Text(
+                          rooms[index].roomName,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        style: ListTileStyle.list,
+                        tileColor: const Color.fromARGB(80, 223, 230, 240),
+                        onTap: () async {
+                          String? accessToken =
+                              await roomControlGrpcControllr.getAccessToARoom(
+                            roomName: rooms[index].roomName,
+                          );
+                          variableController.accessToken = accessToken;
+                          if (accessToken != null) {
+                            Get.toNamed(RoutesMap.singleRoomPage);
+                            return;
+                          } else {
+                            Fluttertoast.showToast(
+                              msg: 'Failed to join room',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
+                            return;
+                          }
+                        },
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const Divider();
+                    },
+                  ),
+                ),
               ));
   }
 

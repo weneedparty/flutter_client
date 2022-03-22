@@ -42,7 +42,7 @@ class MyRoomProfile extends StatelessWidget {
             buildMuteBadge(isMute),
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Row(
@@ -53,7 +53,7 @@ class MyRoomProfile extends StatelessWidget {
               user.name.split(' ')[0],
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -71,7 +71,7 @@ class MyRoomProfile extends StatelessWidget {
               color: Style.AccentGreen,
               borderRadius: BorderRadius.circular(30),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.star,
               color: Colors.white,
               size: 12,
@@ -94,11 +94,11 @@ class MyRoomProfile extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.5),
-                    offset: Offset(0, 1),
+                    offset: const Offset(0, 1),
                   )
                 ],
               ),
-              child: Icon(Icons.mic_off),
+              child: const Icon(Icons.mic_off),
             )
           : Container(),
     );
@@ -118,11 +118,11 @@ class MyRoomProfile extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.5),
-                    offset: Offset(0, 1),
+                    offset: const Offset(0, 1),
                   )
                 ],
               ),
-              child: Text(
+              child: const Text(
                 '🎉',
                 textAlign: TextAlign.center,
                 style: TextStyle(

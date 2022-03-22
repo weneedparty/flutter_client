@@ -13,7 +13,7 @@ class VariableControllr extends GetxController {
   String ourUUID = "";
   final cron = Cron();
 
-  RxList<String> currentUsersUUID = RxList([]);
+  RxList<String> currentUsersUUID = RxList(['a', 'b', 'c', 'd']);
   String? jwt;
   String? accessToken;
 
