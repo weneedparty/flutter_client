@@ -19,13 +19,13 @@ class _WelcomePageState extends State<WelcomePage> {
     super.initState();
 
     () async {
-      await variableController.saveJwt(
-          "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InlpbmdzaGFveG9AZ21haWwuY29tIiwicmFuZG9tX3N0cmluZyI6IjBGTzJFRSJ9.niSe3jhQdefzUJEgQgf7rqvrP2CkkCOls3YW5DkYE2c");
-      Get.offNamed(RoutesMap.roomList);
-      // bool valid = await jwtGrpcController.checkIfCurrentJwtIsValid();
-      // if (valid) {
-      //   Get.offNamed(RoutesMap.roomList);
-      // }
+      // await variableController.saveJwt(
+      //     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InlpbmdzaGFveG9AZ21haWwuY29tIiwicmFuZG9tX3N0cmluZyI6IjBGTzJFRSJ9.niSe3jhQdefzUJEgQgf7rqvrP2CkkCOls3YW5DkYE2c");
+      // Get.offNamed(RoutesMap.roomList);
+      bool valid = await jwtGrpcController.checkIfCurrentJwtIsValid();
+      if (valid) {
+        Get.offNamed(RoutesMap.roomList);
+      }
     }();
   }
 
