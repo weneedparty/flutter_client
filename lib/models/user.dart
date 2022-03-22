@@ -6,16 +6,19 @@ class User {
   final String followers;
   final String following;
   final bool isNewUser;
+  final bool microphoneOn;
+  final bool isSpeaking;
 
-  User({
-    required this.name,
-    required this.username,
-    required this.profileImage,
-    required this.followers,
-    required this.following,
-    required this.lastAccessTime,
-    required this.isNewUser,
-  });
+  User(
+      {required this.name,
+      required this.username,
+      required this.profileImage,
+      required this.followers,
+      required this.following,
+      required this.lastAccessTime,
+      required this.isNewUser,
+      required this.microphoneOn,
+      required this.isSpeaking});
 
   factory User.fromJson(json) {
     return User(
@@ -26,6 +29,8 @@ class User {
       followers: json['followers'] ?? "",
       following: json['following'] ?? '',
       isNewUser: json['isNewUser'] ?? false,
+      microphoneOn: json['microphoneOn'] ?? false,
+      isSpeaking: json['isSpeaking'] ?? false,
     );
   }
 }

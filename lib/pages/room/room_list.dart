@@ -187,13 +187,18 @@ class _RoomListPageState extends State<RoomListPage> {
         title: "Create a room",
         content: Column(
           children: <Widget>[
-            TextField(
-              controller: roomNameInputController,
-              // textAlign: TextAlign.center,
-              keyboardType: TextInputType.text,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.house),
-                labelText: '',
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: TextField(
+                controller: roomNameInputController,
+                // textAlign: TextAlign.center,
+                keyboardType: TextInputType.text,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  // icon: Icon(Icons.house),
+                  icon: null,
+                  labelText: '',
+                ),
               ),
             ),
           ],
@@ -225,15 +230,18 @@ class _RoomListPageState extends State<RoomListPage> {
                   variableController.accessToken = accessToken;
 
                   Navigator.pop(context);
+
+                  updateRooms();
+
                   Get.toNamed(RoutesMap.singleRoomPage);
-                  Fluttertoast.showToast(
-                      msg: "You just created a room: $roomName",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.red,
-                      textColor: Colors.white,
-                      fontSize: 16.0);
+                  // Fluttertoast.showToast(
+                  //     msg: "You just created a room: $roomName",
+                  //     toastLength: Toast.LENGTH_SHORT,
+                  //     gravity: ToastGravity.CENTER,
+                  //     timeInSecForIosWeb: 1,
+                  //     backgroundColor: Colors.red,
+                  //     textColor: Colors.white,
+                  //     fontSize: 16.0);
                   return;
                 }
               } else {

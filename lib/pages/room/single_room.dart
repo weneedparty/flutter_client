@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
-import 'package:livekit_client/livekit_client.dart';
+import 'package:livekit_client/livekit_client.dart' as livekit;
 import 'package:flutter_client/widgets/livekit_widgets/controls.dart';
 import 'package:flutter_client/widgets/livekit_widgets/participant.dart';
 
@@ -15,11 +15,10 @@ class SingleRoomPage extends StatefulWidget {
 }
 
 class _SingleRoomPageState extends State<SingleRoomPage> {
-  Room? theRoom;
-  VideoTrack? track;
+  livekit.Room? theLivekitRoom;
 
-  List<Participant> participants = [];
-  EventsListener<RoomEvent>? roomListener;
+  List<livekit.Participant> participants = [];
+  livekit.EventsListener<livekit.RoomEvent>? roomListener;
 
   @override
   void initState() {
@@ -34,47 +33,47 @@ class _SingleRoomPageState extends State<SingleRoomPage> {
   void dispose() {
     () async {
       // always dispose listener
-      theRoom?.removeListener(_onRoomDidUpdate);
+      theLivekitRoom?.removeListener(_onRoomDidUpdate);
       await disconnectLiveKit();
       await roomListener?.dispose();
-      await theRoom?.dispose();
+      await theLivekitRoom?.dispose();
     }();
 
     super.dispose();
   }
 
   Future<void> connectLiveKit() async {
-    var options = const ConnectOptions(
-        autoSubscribe: true, protocolVersion: ProtocolVersion.v6);
+    var options = const livekit.ConnectOptions(
+        autoSubscribe: true, protocolVersion: livekit.ProtocolVersion.v6);
 
-    var roomOptions = const RoomOptions(
-      defaultVideoPublishOptions: VideoPublishOptions(
+    var roomOptions = const livekit.RoomOptions(
+      defaultVideoPublishOptions: livekit.VideoPublishOptions(
         simulcast: true,
       ),
     );
 
-    theRoom = await LiveKitClient.connect(
+    theLivekitRoom = await livekit.LiveKitClient.connect(
         LivekitConfig.url, variableController.accessToken ?? '',
         connectOptions: options, roomOptions: roomOptions);
 
-    theRoom?.addListener(_onRoomDidUpdate);
-    roomListener = theRoom?.createListener();
+    theLivekitRoom?.addListener(_onRoomDidUpdate);
+    roomListener = theLivekitRoom?.createListener();
 
     try {
       // video will fail when running in ios simulator
-      await theRoom?.localParticipant?.setCameraEnabled(true);
+      await theLivekitRoom?.localParticipant?.setCameraEnabled(true);
     } catch (e) {
       print('could not publish video: $e');
     }
-    await theRoom?.localParticipant?.setMicrophoneEnabled(true);
+    await theLivekitRoom?.localParticipant?.setMicrophoneEnabled(true);
 
-    print('Joined room: ${theRoom?.name ?? ""}');
+    print('Joined room: ${theLivekitRoom?.name ?? ""}');
   }
 
   Future<void> disconnectLiveKit() async {
-    if (theRoom != null) {
-      await theRoom?.disconnect();
-      theRoom = null;
+    if (theLivekitRoom != null) {
+      await theLivekitRoom?.disconnect();
+      theLivekitRoom = null;
     }
   }
 
@@ -83,10 +82,10 @@ class _SingleRoomPageState extends State<SingleRoomPage> {
   }
 
   void _sortParticipants() {
-    List<Participant> participants = [];
+    List<livekit.Participant> participants = [];
 
-    if (theRoom?.participants.isNotEmpty == true) {
-      participants.addAll(theRoom!.participants.values);
+    if (theLivekitRoom?.participants.isNotEmpty == true) {
+      participants.addAll(theLivekitRoom!.participants.values);
       print('participants: ${participants.length}');
 
       // sort speakers for the grid
@@ -119,8 +118,8 @@ class _SingleRoomPageState extends State<SingleRoomPage> {
       });
     }
 
-    if (theRoom != null) {
-      final localParticipant = theRoom?.localParticipant;
+    if (theLivekitRoom != null) {
+      final localParticipant = theLivekitRoom?.localParticipant;
       if (localParticipant != null) {
         if (participants.length > 1) {
           participants.insert(1, localParticipant);
@@ -163,10 +162,11 @@ class _SingleRoomPageState extends State<SingleRoomPage> {
                 ),
               ),
             ),
-            if (theRoom?.localParticipant != null)
+            if (theLivekitRoom?.localParticipant != null)
               SafeArea(
                 top: false,
-                child: ControlsWidget(theRoom!, theRoom!.localParticipant!),
+                child: ControlsWidget(
+                    theLivekitRoom!, theLivekitRoom!.localParticipant!),
               ),
           ],
         ),

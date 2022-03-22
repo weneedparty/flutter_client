@@ -90,4 +90,3 @@ List lobbyBottomSheets = [
 ];
 
 List<User> users = List.generate(20, (index) => User.fromJson(userData[index]));
-User myProfile = User.fromJson(profileData);

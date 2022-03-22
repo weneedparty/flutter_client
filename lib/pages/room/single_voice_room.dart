@@ -1,6 +1,7 @@
 import 'package:flutter_client/models/room.dart';
 import 'package:flutter_client/models/user.dart';
 import 'package:flutter_client/pages/room/widgets/my_room_profile.dart';
+import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
 import 'package:flutter_client/utils/data.dart';
 import 'package:flutter_client/utils/style.dart';
@@ -11,8 +12,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:math';
 
-String getARandomCatPicturePath({required int maxNum}) {
-  return 'assets/images/cat${getARandomNumber(1, maxNum)}.jpg';
+import 'package:livekit_client/livekit_client.dart' as livekit;
+
+Map<String, String> identityPictureMap = {};
+String getARandomCatPicturePath(String identity) {
+  if (identity.isEmpty) {
+    return "";
+  }
+
+  if (identityPictureMap.containsKey(identity)) {
+    return identityPictureMap[identity]!;
+  } else {
+    String path = 'assets/images/cat${getARandomNumber(1, 9)}.jpg';
+    identityPictureMap[identity] = path;
+    return path;
+  }
 }
 
 class SingleVoiceRoom extends StatefulWidget {
@@ -23,24 +37,160 @@ class SingleVoiceRoom extends StatefulWidget {
 }
 
 class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
+  User? myProfile;
   Room? room;
+
+  livekit.Room? theLivekitRoom;
+
+  List<livekit.Participant> participants = [];
+  livekit.EventsListener<livekit.RoomEvent>? roomListener;
 
   @override
   void initState() {
     super.initState();
 
     () async {
-      room = Room.fromJson({
-        'title': "yingshaoxo's chat room",
-        "users": variableController.currentUsersUUID
-            .map((uuid) => User.fromJson({
-                  'name': uuid.substring(0, [8, uuid.length].reduce(min)),
-                  'profileImage': getARandomCatPicturePath(maxNum: uuid.length)
-                }))
-            .toList(),
-        'speakerCount': variableController.currentUsersUUID.length,
+      myProfile = User.fromJson({
+        'name': variableController.userEmail,
+        'username': variableController.userEmail,
+        'profileImage': 'assets/images/cat2.jpg',
+        'followers': '1k',
+        'following': '1',
+        'lastAccessTime': '0m',
+        'isNewUser': false,
       });
+      await connectLiveKit();
     }();
+  }
+
+  @override
+  void dispose() {
+    () async {
+      // always dispose listener
+      theLivekitRoom?.removeListener(_onRoomDidUpdate);
+      await disconnectLiveKit();
+      await roomListener?.dispose();
+      await theLivekitRoom?.dispose();
+    }();
+
+    super.dispose();
+  }
+
+  Future<void> connectLiveKit() async {
+    var options = const livekit.ConnectOptions(
+        autoSubscribe: true, protocolVersion: livekit.ProtocolVersion.v6);
+
+    var roomOptions = const livekit.RoomOptions(
+      defaultVideoPublishOptions: livekit.VideoPublishOptions(
+        simulcast: true,
+      ),
+      defaultAudioCaptureOptions: livekit.AudioCaptureOptions(
+        echoCancellation: true,
+        noiseSuppression: true,
+      ),
+    );
+
+    theLivekitRoom = await livekit.LiveKitClient.connect(
+        LivekitConfig.url, variableController.accessToken ?? '',
+        connectOptions: options, roomOptions: roomOptions);
+
+    theLivekitRoom?.addListener(_onRoomDidUpdate);
+    roomListener = theLivekitRoom?.createListener();
+
+    // try {
+    //   // video will fail when running in ios simulator
+    //   await theLivekitRoom?.localParticipant?.setCameraEnabled(true);
+    // } catch (e) {
+    //   print('could not publish video: $e');
+    // }
+
+    // await theLivekitRoom?.localParticipant?.setMicrophoneEnabled(true);
+
+    print('Joined room: ${theLivekitRoom?.name ?? ""}');
+  }
+
+  Future<void> disconnectLiveKit() async {
+    if (theLivekitRoom != null) {
+      await theLivekitRoom?.disconnect();
+      theLivekitRoom = null;
+    }
+  }
+
+  void _onRoomDidUpdate() {
+    _sortParticipants();
+  }
+
+  void _sortParticipants() {
+    if (theLivekitRoom == null) return;
+
+    // update participants
+    List<livekit.Participant> tempParticipants = [];
+
+    if (theLivekitRoom?.participants.isNotEmpty == true) {
+      tempParticipants.addAll(theLivekitRoom!.participants.values);
+      print('participants: ${tempParticipants.length}');
+
+      // sort speakers for the grid
+      tempParticipants.sort((a, b) {
+        // loudest speaker first
+        if (a.isSpeaking && b.isSpeaking) {
+          if (a.audioLevel > b.audioLevel) {
+            return -1;
+          } else {
+            return 1;
+          }
+        }
+
+        // last spoken at
+        final aSpokeAt = a.lastSpokeAt?.millisecondsSinceEpoch ?? 0;
+        final bSpokeAt = b.lastSpokeAt?.millisecondsSinceEpoch ?? 0;
+
+        if (aSpokeAt != bSpokeAt) {
+          return aSpokeAt > bSpokeAt ? -1 : 1;
+        }
+
+        // video on
+        if (a.hasVideo != b.hasVideo) {
+          return a.hasVideo ? -1 : 1;
+        }
+
+        // joinedAt
+        return a.joinedAt.millisecondsSinceEpoch -
+            b.joinedAt.millisecondsSinceEpoch;
+      });
+    }
+
+    if (theLivekitRoom != null) {
+      final tempLocalParticipant = theLivekitRoom?.localParticipant;
+      if (tempLocalParticipant != null) {
+        if (tempParticipants.length > 1) {
+          tempParticipants.insert(1, tempLocalParticipant);
+        } else {
+          tempParticipants.add(tempLocalParticipant);
+        }
+      }
+    }
+
+    // update room
+    Room? tempRoom = Room.fromJson({
+      'title': theLivekitRoom?.name ?? '',
+      "users": participants
+          .map((participant) => User.fromJson({
+                'username': participant.identity,
+                'name': participant.identity
+                    .substring(0, [8, participant.identity.length].reduce(min)),
+                'profileImage': getARandomCatPicturePath(participant.identity),
+                'microphoneOn': participant.isMicrophoneEnabled(),
+                'isSpeaking': participant.isSpeaking,
+              }))
+          .toList(),
+      'speakerCount': participants.length,
+    });
+
+    setState(() {
+      participants = tempParticipants;
+      room = tempRoom;
+    });
   }
 
   @override
@@ -77,10 +227,10 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
             GestureDetector(
               onTap: () {
                 //head picture
-                grpcController.getCurrentUserUUIDlist();
+                // grpcController.getCurrentUserUUIDlist();
               },
               child: RoundImage(
-                path: myProfile.profileImage,
+                path: getARandomCatPicturePath(myProfile?.username ?? ""),
                 width: 40,
                 height: 40,
               ),
@@ -173,11 +323,29 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
       ),
       itemCount: users.length,
       itemBuilder: (gc, index) {
-        return MyRoomProfile(
-          user: users[index],
-          isModerator: false,
-          isMute: index == 3,
-          size: 80,
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            if (users[index].username == (myProfile?.username ?? "")) {
+              var localParticipant = theLivekitRoom?.localParticipant;
+              if (localParticipant != null) {
+                if (localParticipant.isMuted) {
+                  await theLivekitRoom?.localParticipant
+                      ?.setMicrophoneEnabled(true);
+                } else {
+                  await theLivekitRoom?.localParticipant
+                      ?.setMicrophoneEnabled(false);
+                }
+              }
+            }
+          },
+          child: MyRoomProfile(
+            user: users[index],
+            isModerator: false,
+            isMute: !users[index].microphoneOn,
+            isSpeaking: users[index].isSpeaking,
+            size: 80,
+          ),
         );
       },
     );

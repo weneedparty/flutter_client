@@ -1,23 +1,50 @@
+import 'dart:async';
+
 import 'package:flutter_client/models/user.dart';
 import 'package:flutter_client/utils/style.dart';
 import 'package:flutter_client/widgets/round_image.dart';
 import 'package:flutter/material.dart';
+import 'package:livekit_client/livekit_client.dart' as livekit;
 
 import 'dart:math' as math;
 
-class MyRoomProfile extends StatelessWidget {
+class MyRoomProfile extends StatefulWidget {
   final User user;
   final double size;
   final bool isMute;
   final bool isModerator;
+  final bool isSpeaking;
 
-  const MyRoomProfile(
-      {Key? key,
-      required this.user,
-      required this.size,
-      this.isMute = false,
-      this.isModerator = false})
-      : super(key: key);
+  MyRoomProfile({
+    Key? key,
+    required this.user,
+    required this.size,
+    this.isMute = false,
+    this.isModerator = false,
+    this.isSpeaking = false,
+  }) : super(key: key);
+
+  @override
+  State<MyRoomProfile> createState() => _MyRoomProfileState();
+}
+
+class _MyRoomProfileState extends State<MyRoomProfile> {
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // timer = Timer.periodic(const Duration(seconds: 1), (Timer t) async {
+    //   setState(() {});
+    // });
+  }
+
+  @override
+  void dispose() {
+    // timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,21 +52,18 @@ class MyRoomProfile extends StatelessWidget {
       children: [
         Stack(
           children: [
-            GestureDetector(
-              onTap: () {},
-              child: Ripples(
-                size: 50,
-                waveOn: false,
-                color: Colors.blue,
-                child: RoundImage(
-                  path: user.profileImage,
-                  width: size,
-                  height: size,
-                ),
+            Ripples(
+              size: 50,
+              waveOn: widget.isSpeaking,
+              color: Colors.blue,
+              child: RoundImage(
+                path: widget.user.profileImage,
+                width: widget.size,
+                height: widget.size,
               ),
             ),
             // buildNewBadge(user.isNewUser),
-            buildMuteBadge(isMute),
+            buildMuteBadge(widget.isMute),
           ],
         ),
         const SizedBox(
@@ -48,9 +72,9 @@ class MyRoomProfile extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            buildModeratorBadge(isModerator),
+            buildModeratorBadge(widget.isModerator),
             Text(
-              user.name.split(' ')[0],
+              widget.user.name.split(' ')[0],
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: const TextStyle(
@@ -218,6 +242,7 @@ class _RipplesState extends State<Ripples> with TickerProviderStateMixin {
     if (widget.waveOn == false) {
       return _button();
     }
+
     return CustomPaint(
       painter: _CirclePainter(
         _controller,

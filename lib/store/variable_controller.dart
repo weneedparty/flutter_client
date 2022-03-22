@@ -15,6 +15,7 @@ class VariableControllr extends GetxController {
 
   RxList<String> currentUsersUUID = RxList(['a', 'b', 'c', 'd']);
   String? jwt;
+  String? userEmail;
   String? accessToken;
 
   SharedPreferences? preferences;
@@ -24,6 +25,7 @@ class VariableControllr extends GetxController {
     preferences = await _prefs;
 
     jwt = preferences?.getString(LocalStorageKeys.jwt);
+    userEmail = preferences?.getString(LocalStorageKeys.userEmail);
 
     ourUUID = await getUniqueDeviceId();
   }
@@ -32,6 +34,13 @@ class VariableControllr extends GetxController {
     if (jwt != null && jwt != "") {
       this.jwt = jwt;
       await preferences?.setString(LocalStorageKeys.jwt, jwt);
+    }
+  }
+
+  Future<void> saveUserEmail(String? userEmail) async {
+    if (userEmail != null && userEmail != "") {
+      this.userEmail = userEmail;
+      await preferences?.setString(LocalStorageKeys.userEmail, userEmail);
     }
   }
 }
