@@ -15,7 +15,7 @@ class MyRoomProfile extends StatefulWidget {
   final bool isModerator;
   final bool isSpeaking;
 
-  MyRoomProfile({
+  const MyRoomProfile({
     Key? key,
     required this.user,
     required this.size,
@@ -48,42 +48,46 @@ class _MyRoomProfileState extends State<MyRoomProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Stack(
-          children: [
-            Ripples(
-              size: 50,
-              waveOn: widget.isSpeaking,
-              color: Colors.blue,
-              child: RoundImage(
-                path: widget.user.profileImage,
-                width: widget.size,
-                height: widget.size,
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      // padding: const EdgeInsets.only(top: 0),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Ripples(
+                size: 50,
+                waveOn: widget.isSpeaking,
+                color: Colors.blue,
+                child: RoundImage(
+                  path: widget.user.profileImage,
+                  width: widget.size,
+                  height: widget.size,
+                ),
               ),
-            ),
-            // buildNewBadge(user.isNewUser),
-            buildMuteBadge(widget.isMute),
-          ],
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            buildModeratorBadge(widget.isModerator),
-            Text(
-              widget.user.name.split(' ')[0],
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+              // buildNewBadge(user.isNewUser),
+              buildMuteBadge(widget.isMute),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              buildModeratorBadge(widget.isModerator),
+              Text(
+                widget.user.name.split(' ')[0],
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -248,11 +252,7 @@ class _RipplesState extends State<Ripples> with TickerProviderStateMixin {
         _controller,
         color: widget.color,
       ),
-      child: SizedBox(
-        width: widget.size * 2.125,
-        height: widget.size * 2.125,
-        child: _button(),
-      ),
+      child: _button(),
     );
   }
 }

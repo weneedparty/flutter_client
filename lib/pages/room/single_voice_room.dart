@@ -270,7 +270,7 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
                         children: [
                           buildTitle(room?.title ?? ""),
                           const SizedBox(
-                            height: 30,
+                            height: 15,
                           ),
                           buildSpeakers(
                               room?.users.sublist(0, room?.speakerCount ?? 0) ??
@@ -320,6 +320,7 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         mainAxisExtent: 150,
+        crossAxisSpacing: 20,
       ),
       itemCount: users.length,
       itemBuilder: (gc, index) {
