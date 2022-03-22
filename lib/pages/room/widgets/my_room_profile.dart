@@ -4,7 +4,6 @@ import 'package:flutter_client/models/user.dart';
 import 'package:flutter_client/utils/style.dart';
 import 'package:flutter_client/widgets/round_image.dart';
 import 'package:flutter/material.dart';
-import 'package:livekit_client/livekit_client.dart' as livekit;
 
 import 'dart:math' as math;
 

@@ -1,7 +1,6 @@
 import 'dart:core';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_client/generated_grpc/account_service.pbgrpc.dart'
     as account_service;
 import 'package:flutter_client/generated_grpc/room_control_service.pbgrpc.dart'
@@ -9,7 +8,6 @@ import 'package:flutter_client/generated_grpc/room_control_service.pbgrpc.dart'
 import 'package:flutter_client/generated_grpc/helloworld.pbgrpc.dart';
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
-import 'package:flutter_client/store/variable_controller.dart';
 import 'package:flutter_client/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:grpc/grpc.dart';

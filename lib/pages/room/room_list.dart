@@ -1,7 +1,6 @@
 import 'package:flutter_client/generated_grpc/room_control_service.pb.dart';
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
-import 'package:flutter_client/store/variable_controller.dart';
 import 'package:flutter_client/widgets/round_button.dart';
 import 'package:flutter_client/utils/style.dart';
 import 'package:flutter/material.dart';

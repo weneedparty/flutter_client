@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fixnum/fixnum.dart';
+import 'package:flutter/services.dart';
 
 Future<String> getUniqueDeviceId() async {
   var deviceInfo = DeviceInfoPlugin();
@@ -28,4 +29,8 @@ bool emailValidator(String email) {
   return RegExp(
           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
       .hasMatch(email);
+}
+
+Future<void> copyToClipboard(String text) async {
+  await Clipboard.setData(ClipboardData(text: text));
 }

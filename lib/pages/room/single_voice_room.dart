@@ -3,13 +3,12 @@ import 'package:flutter_client/models/user.dart';
 import 'package:flutter_client/pages/room/widgets/my_room_profile.dart';
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
-import 'package:flutter_client/utils/data.dart';
 import 'package:flutter_client/utils/style.dart';
 import 'package:flutter_client/utils/utils.dart';
 import 'package:flutter_client/widgets/round_button.dart';
 import 'package:flutter_client/widgets/round_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:math';
 
 import 'package:livekit_client/livekit_client.dart' as livekit;
@@ -338,6 +337,19 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
                       ?.setMicrophoneEnabled(false);
                 }
               }
+            }
+          },
+          onDoubleTap: () async {
+            if (users[index].username != (myProfile?.username ?? "")) {
+              await copyToClipboard(users[index].username);
+              Fluttertoast.showToast(
+                  msg: users[index].username,
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.white,
+                  textColor: Colors.black,
+                  fontSize: 16.0);
             }
           },
           child: MyRoomProfile(
