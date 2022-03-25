@@ -19,7 +19,9 @@ class _RoomListPageState extends State<RoomListPage> {
   List<RoomInfo> rooms = [];
 
   Future<void> updateRooms() async {
-    rooms = await roomControlGrpcControllr.getRoomList();
+    rooms = (await roomControlGrpcControllr.getRoomList())
+        .where((room) => room.hasRoomName())
+        .toList();
     setState(() {});
   }
 
