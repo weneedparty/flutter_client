@@ -154,7 +154,7 @@ class _EmailPageState extends State<EmailPage> {
                   fontSize: 16.0);
             } else {
               bool result = await jwtGrpcController.preRegister(
-                  email: _emailController.text);
+                  email: _emailController.text.trim());
               if (result) {
                 variableController.preferences?.setString(
                     LocalStorageKeys.userEmail, _emailController.text);

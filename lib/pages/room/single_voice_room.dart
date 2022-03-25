@@ -86,6 +86,7 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
       defaultAudioCaptureOptions: livekit.AudioCaptureOptions(
         echoCancellation: true,
         noiseSuppression: true,
+        autoGainControl: true,
       ),
     );
 

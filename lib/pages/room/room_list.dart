@@ -6,6 +6,7 @@ import 'package:flutter_client/utils/style.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 class RoomListPage extends StatefulWidget {
@@ -31,6 +32,20 @@ class _RoomListPageState extends State<RoomListPage> {
 
     () async {
       await updateRooms();
+
+      // <uses-feature android:name="android.hardware.camera" />
+      // <uses-feature android:name="android.hardware.camera.autofocus" />
+      // <uses-permission android:name="android.permission.CAMERA" />
+      // <uses-permission android:name="android.permission.RECORD_AUDIO" />
+      // <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+      // <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+      // <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+      // <uses-permission android:name="android.permission.INTERNET" />
+
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.camera,
+        Permission.microphone,
+      ].request();
     }();
   }
 

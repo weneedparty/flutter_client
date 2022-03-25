@@ -153,7 +153,7 @@ class _VerifyPageState extends State<VerifyPage> {
                   email: variableController.preferences
                           ?.getString(LocalStorageKeys.userEmail) ??
                       "",
-                  code: _codeController.text);
+                  code: _codeController.text.trim());
               if (jwt != null) {
                 await variableController.saveJwt(jwt);
                 print("jwt: " + jwt);
