@@ -12,7 +12,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   () async {
-    variableController.initilizeFunction();
+    await variableController.initilizeFunction();
 
     runApp(GetMaterialApp(
       initialRoute: RoutesMap.welcome,
