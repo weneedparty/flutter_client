@@ -149,10 +149,11 @@ class _VerifyPageState extends State<VerifyPage> {
                   textColor: Colors.black,
                   fontSize: 16.0);
             } else {
+              String emailAddress = variableController.preferences
+                      ?.getString(LocalStorageKeys.userEmail) ??
+                  "";
               String? jwt = await jwtGrpcController.registerConfirm(
-                  email: variableController.preferences
-                          ?.getString(LocalStorageKeys.userEmail) ??
-                      "",
+                  email: emailAddress.trim(),
                   code: _codeController.text.trim());
               if (jwt != null) {
                 await variableController.saveJwt(jwt);

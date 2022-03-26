@@ -13,6 +13,8 @@ class MyRoomProfile extends StatefulWidget {
   final bool isMute;
   final bool isModerator;
   final bool isSpeaking;
+  final Function toggleMicrophone;
+  final Function showEmailAddress;
 
   const MyRoomProfile({
     Key? key,
@@ -21,6 +23,8 @@ class MyRoomProfile extends StatefulWidget {
     this.isMute = false,
     this.isModerator = false,
     this.isSpeaking = false,
+    required this.toggleMicrophone,
+    required this.showEmailAddress,
   }) : super(key: key);
 
   @override
@@ -58,10 +62,15 @@ class _MyRoomProfileState extends State<MyRoomProfile> {
                 size: 50,
                 waveOn: widget.isSpeaking,
                 color: Colors.blue,
-                child: RoundImage(
-                  path: widget.user.profileImage,
-                  width: widget.size,
-                  height: widget.size,
+                child: GestureDetector(
+                  onTap: () async {
+                    await widget.toggleMicrophone();
+                  },
+                  child: RoundImage(
+                    path: widget.user.profileImage,
+                    width: widget.size,
+                    height: widget.size,
+                  ),
                 ),
               ),
               // buildNewBadge(user.isNewUser),
@@ -75,12 +84,17 @@ class _MyRoomProfileState extends State<MyRoomProfile> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               buildModeratorBadge(widget.isModerator),
-              Text(
-                widget.user.name.split(' ')[0],
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () async {
+                  await widget.showEmailAddress();
+                },
+                child: Text(
+                  widget.user.name.split(' ')[0],
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

@@ -153,11 +153,13 @@ class _EmailPageState extends State<EmailPage> {
                   textColor: Colors.black,
                   fontSize: 16.0);
             } else {
-              bool result = await jwtGrpcController.preRegister(
-                  email: _emailController.text.trim());
+              String theEmailAddress = _emailController.text.trim();
+
+              bool result =
+                  await jwtGrpcController.preRegister(email: theEmailAddress);
               if (result) {
-                variableController.preferences?.setString(
-                    LocalStorageKeys.userEmail, _emailController.text);
+                variableController.preferences
+                    ?.setString(LocalStorageKeys.userEmail, theEmailAddress);
                 Get.offNamed(RoutesMap.registerVerifying);
               } else {
                 Fluttertoast.showToast(

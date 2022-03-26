@@ -324,9 +324,13 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
       ),
       itemCount: users.length,
       itemBuilder: (gc, index) {
-        return GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
+        return MyRoomProfile(
+          user: users[index],
+          isModerator: false,
+          isMute: !users[index].microphoneOn,
+          isSpeaking: users[index].isSpeaking,
+          size: 80,
+          toggleMicrophone: () async {
             if (users[index].username == (myProfile?.username ?? "")) {
               var localParticipant = theLivekitRoom?.localParticipant;
               if (localParticipant != null) {
@@ -340,26 +344,17 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
               }
             }
           },
-          onDoubleTap: () async {
-            if (users[index].username != (myProfile?.username ?? "")) {
-              await copyToClipboard(users[index].username);
-              Fluttertoast.showToast(
-                  msg: users[index].username,
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.CENTER,
-                  timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.white,
-                  textColor: Colors.black,
-                  fontSize: 16.0);
-            }
+          showEmailAddress: () async {
+            await copyToClipboard(users[index].username);
+            Fluttertoast.showToast(
+                msg: users[index].username,
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.white,
+                textColor: Colors.black,
+                fontSize: 16.0);
           },
-          child: MyRoomProfile(
-            user: users[index],
-            isModerator: false,
-            isMute: !users[index].microphoneOn,
-            isSpeaking: users[index].isSpeaking,
-            size: 80,
-          ),
         );
       },
     );
