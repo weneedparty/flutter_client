@@ -13,7 +13,6 @@ class MyRoomProfile extends StatefulWidget {
   final bool isMute;
   final bool isModerator;
   final bool isSpeaking;
-  final Function toggleMicrophone;
   final Function showEmailAddress;
 
   const MyRoomProfile({
@@ -23,7 +22,6 @@ class MyRoomProfile extends StatefulWidget {
     this.isMute = false,
     this.isModerator = false,
     this.isSpeaking = false,
-    required this.toggleMicrophone,
     required this.showEmailAddress,
   }) : super(key: key);
 
@@ -63,8 +61,8 @@ class _MyRoomProfileState extends State<MyRoomProfile> {
                 waveOn: widget.isSpeaking,
                 color: Colors.blue,
                 child: GestureDetector(
-                  onTap: () async {
-                    await widget.toggleMicrophone();
+                  onDoubleTap: () async {
+                    await widget.showEmailAddress();
                   },
                   child: RoundImage(
                     path: widget.user.profileImage,

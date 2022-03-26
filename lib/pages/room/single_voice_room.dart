@@ -10,6 +10,7 @@ import 'package:flutter_client/widgets/round_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:math';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:livekit_client/livekit_client.dart' as livekit;
 
@@ -193,8 +194,16 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
     });
   }
 
+  bool doesLocalParticipantMicrophoneEnabled() {
+    final localParticipant = theLivekitRoom?.localParticipant;
+    if (localParticipant == null) return false;
+    return localParticipant.isMicrophoneEnabled();
+  }
+
   @override
   Widget build(BuildContext context) {
+    var realUsers = room?.users.sublist(0, room?.speakerCount ?? 0) ?? [];
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 150,
@@ -238,8 +247,8 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
           ],
         ),
       ),
-      body: room == null
-          ? const Center(child: Text('loading...'))
+      body: room == null || realUsers.isEmpty
+          ? const Center(child: Text('Loading...'))
           : Container(
               padding: const EdgeInsets.only(
                 left: 20,
@@ -272,10 +281,7 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
                           const SizedBox(
                             height: 15,
                           ),
-                          buildSpeakers(
-                              room?.users.sublist(0, room?.speakerCount ?? 0) ??
-                                  []),
-                          // buildOthers(room.users.sublist(room.speakerCount)),
+                          buildSpeakers(realUsers),
                         ],
                       ),
                     ),
@@ -330,20 +336,6 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
           isMute: !users[index].microphoneOn,
           isSpeaking: users[index].isSpeaking,
           size: 80,
-          toggleMicrophone: () async {
-            if (users[index].username == (myProfile?.username ?? "")) {
-              var localParticipant = theLivekitRoom?.localParticipant;
-              if (localParticipant != null) {
-                if (localParticipant.isMuted) {
-                  await theLivekitRoom?.localParticipant
-                      ?.setMicrophoneEnabled(true);
-                } else {
-                  await theLivekitRoom?.localParticipant
-                      ?.setMicrophoneEnabled(false);
-                }
-              }
-            }
-          },
           showEmailAddress: () async {
             await copyToClipboard(users[index].username);
             Fluttertoast.showToast(
@@ -381,7 +373,10 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
           ),
           const Spacer(),
           RoundButton(
-            onPressed: () async {},
+            onPressed: () async {
+              await launch(
+                  "https://www.youtube.com/channel/UCbT9GDmkqf555ATReJor6ag");
+            },
             color: Style.LightGrey,
             isCircle: true,
             child: const Icon(
@@ -391,11 +386,24 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
             ),
           ),
           RoundButton(
-            onPressed: () async {},
+            onPressed: () async {
+              var localParticipant = theLivekitRoom?.localParticipant;
+              if (localParticipant != null) {
+                if (localParticipant.isMuted) {
+                  await theLivekitRoom?.localParticipant
+                      ?.setMicrophoneEnabled(true);
+                } else {
+                  await theLivekitRoom?.localParticipant
+                      ?.setMicrophoneEnabled(false);
+                }
+              }
+            },
             color: Style.LightGrey,
             isCircle: true,
-            child: const Icon(
-              Icons.thumb_up,
+            child: Icon(
+              doesLocalParticipantMicrophoneEnabled() == true
+                  ? Icons.mic
+                  : Icons.mic_off,
               size: 15,
               color: Colors.black,
             ),
