@@ -124,15 +124,6 @@ class _VerifyPageState extends State<VerifyPage> {
   Widget buildBottom() {
     return Column(
       children: [
-        const Text(
-          'By entering your code, you\'re agreeing to out\nTerms or Services and Privacy Policy. Thanks!',
-          style: TextStyle(
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(
-          height: 30,
-        ),
         RoundButton(
           color: Style.AccentBlue,
           minimumWidth: 230,
