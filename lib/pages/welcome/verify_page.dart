@@ -107,7 +107,7 @@ class _VerifyPageState extends State<VerifyPage> {
                   errorBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
                 ),
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.number,
                 style: const TextStyle(
                   fontSize: 20,
                   color: Colors.black,
