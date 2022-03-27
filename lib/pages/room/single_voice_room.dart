@@ -1,3 +1,4 @@
+import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter_client/models/room.dart';
 import 'package:flutter_client/models/user.dart';
 import 'package:flutter_client/pages/room/widgets/my_room_profile.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_client/utils/utils.dart';
 import 'package:flutter_client/widgets/round_button.dart';
 import 'package:flutter_client/widgets/round_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:math';
 import 'package:url_launcher/url_launcher.dart';
@@ -36,7 +38,8 @@ class SingleVoiceRoom extends StatefulWidget {
   State<SingleVoiceRoom> createState() => _SingleVoiceRoomState();
 }
 
-class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
+class _SingleVoiceRoomState extends State<SingleVoiceRoom>
+    with TickerProviderStateMixin {
   User? myProfile;
   Room? room;
 
@@ -212,15 +215,22 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
         title: Row(
           children: [
             InkWell(
-              onTap: () {
-                Navigator.pop(context);
+              onTap: () async {
+                if (await confirm(
+                  context,
+                  content: const Text('Do you want to leave this room?'),
+                  textOK: const Text('Yes'),
+                  textCancel: const Text('No'),
+                )) {
+                  Navigator.pop(context);
+                }
               },
               child: Row(
                 children: [
                   IconButton(
                     iconSize: 30,
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    onPressed: () {},
+                    onPressed: () async {},
                   ),
                   const Text(
                     'All rooms',
@@ -248,7 +258,13 @@ class _SingleVoiceRoomState extends State<SingleVoiceRoom> {
         ),
       ),
       body: room == null || realUsers.isEmpty
-          ? const Center(child: Text('Loading...'))
+          ? Center(
+              child: SpinKitThreeBounce(
+              color: Colors.green[100],
+              size: 60.0,
+              controller: AnimationController(
+                  vsync: this, duration: const Duration(milliseconds: 1200)),
+            ))
           : Container(
               padding: const EdgeInsets.only(
                 left: 20,

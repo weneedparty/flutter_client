@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_client/generated_grpc/room_control_service.pb.dart';
 import 'package:flutter_client/store/constants.dart';
 import 'package:flutter_client/store/global_controller_variables.dart';
@@ -7,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 class RoomListPage extends StatefulWidget {
@@ -17,6 +21,9 @@ class RoomListPage extends StatefulWidget {
 }
 
 class _RoomListPageState extends State<RoomListPage> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
   List<RoomInfo> rooms = [];
 
   Future<void> updateRooms() async {
@@ -33,20 +40,32 @@ class _RoomListPageState extends State<RoomListPage> {
     () async {
       await updateRooms();
 
-      // <uses-feature android:name="android.hardware.camera" />
-      // <uses-feature android:name="android.hardware.camera.autofocus" />
-      // <uses-permission android:name="android.permission.CAMERA" />
-      // <uses-permission android:name="android.permission.RECORD_AUDIO" />
-      // <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-      // <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-      // <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-      // <uses-permission android:name="android.permission.INTERNET" />
-
       Map<Permission, PermissionStatus> statuses = await [
-        Permission.camera,
+        // Permission.camera,
         Permission.microphone,
       ].request();
+      if (statuses.values.any((status) => status != PermissionStatus.granted)) {
+        await Alert(
+          context: context,
+          title: 'Permission denied',
+          desc: 'Please grant the required permissions to use this app.',
+          buttons: [
+            DialogButton(
+              child: const Text('OK'),
+              onPressed: () => exit(0),
+            ),
+          ],
+        ).show();
+      }
     }();
+  }
+
+  void _onRefresh() async {
+    try {
+      await updateRooms();
+    } finally {
+      _refreshController.refreshCompleted();
+    }
   }
 
   @override
@@ -125,7 +144,52 @@ class _RoomListPageState extends State<RoomListPage> {
       borderRadius: BorderRadius.circular(10.0),
     );
 
-    return Theme(
+    var listView = ListView.separated(
+      physics: const ClampingScrollPhysics(),
+      shrinkWrap: false,
+      itemCount: rooms.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          // shape: RoundedRectangleBorder(
+          //     side: const BorderSide(
+          //         color: Colors.transparent, width: 1),
+          //     borderRadius: BorderRadius.circular(0)),
+          title: Text(
+            rooms[index].roomName,
+            style: const TextStyle(fontSize: 18),
+          ),
+          style: ListTileStyle.list,
+          tileColor: const Color.fromARGB(80, 223, 230, 240),
+          onTap: () async {
+            String? accessToken =
+                await roomControlGrpcControllr.getAccessToARoom(
+              roomName: rooms[index].roomName,
+            );
+            variableController.accessToken = accessToken;
+            if (accessToken != null) {
+              Get.toNamed(RoutesMap.singleRoomPage);
+              return;
+            } else {
+              Fluttertoast.showToast(
+                msg: 'Failed to join room',
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+              return;
+            }
+          },
+        );
+      },
+      separatorBuilder: (context, index) {
+        return const Divider();
+      },
+    );
+
+    var theme = Theme(
         data: Theme.of(context).copyWith(
           colorScheme: ColorScheme.fromSwatch(
             accentColor: const Color.fromARGB(
@@ -148,51 +212,22 @@ class _RoomListPageState extends State<RoomListPage> {
                 child: Card(
                   borderOnForeground: true,
                   shape: border,
-                  child: ListView.separated(
-                    physics: const ClampingScrollPhysics(),
-                    itemCount: rooms.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        // shape: RoundedRectangleBorder(
-                        //     side: const BorderSide(
-                        //         color: Colors.transparent, width: 1),
-                        //     borderRadius: BorderRadius.circular(0)),
-                        title: Text(
-                          rooms[index].roomName,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                        style: ListTileStyle.list,
-                        tileColor: const Color.fromARGB(80, 223, 230, 240),
-                        onTap: () async {
-                          String? accessToken =
-                              await roomControlGrpcControllr.getAccessToARoom(
-                            roomName: rooms[index].roomName,
-                          );
-                          variableController.accessToken = accessToken;
-                          if (accessToken != null) {
-                            Get.toNamed(RoutesMap.singleRoomPage);
-                            return;
-                          } else {
-                            Fluttertoast.showToast(
-                              msg: 'Failed to join room',
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIosWeb: 1,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                              fontSize: 16.0,
-                            );
-                            return;
-                          }
-                        },
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return const Divider();
-                    },
-                  ),
+                  child: listView,
                 ),
               ));
+
+    return SmartRefresher(
+      enablePullDown: true,
+      enablePullUp: false,
+      physics: const BouncingScrollPhysics(),
+      header: const MaterialClassicHeader(
+        height: 100,
+        distance: 0,
+      ),
+      controller: _refreshController,
+      onRefresh: _onRefresh,
+      child: theme,
+    );
   }
 
   void showCreateRoomDialog({required BuildContext context}) {
