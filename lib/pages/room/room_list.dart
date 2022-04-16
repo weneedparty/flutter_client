@@ -43,6 +43,7 @@ class _RoomListPageState extends State<RoomListPage> {
       Map<Permission, PermissionStatus> statuses = await [
         // Permission.camera,
         Permission.microphone,
+        Permission.bluetooth,
       ].request();
       if (statuses.values.any((status) => status != PermissionStatus.granted)) {
         await Alert(

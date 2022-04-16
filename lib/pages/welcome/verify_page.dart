@@ -85,6 +85,7 @@ class _VerifyPageState extends State<VerifyPage> {
             child: Form(
               key: _formKey,
               child: TextFormField(
+                key: const Key("verify_input"),
                 onChanged: (value) {
                   // _formKey.currentState?.validate();
                 },

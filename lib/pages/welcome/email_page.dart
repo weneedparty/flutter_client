@@ -82,6 +82,7 @@ class _EmailPageState extends State<EmailPage> {
             child: Form(
               key: _formKey,
               child: TextFormField(
+                key: const Key("email_input"),
                 onChanged: (value) {
                   _formKey.currentState?.validate();
                 },
